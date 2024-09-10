@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Competition - Sign Up & Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .container {
+      width: 50%;
+      height: 500px;
+      position: relative;
+      perspective: 1000px;
+    }
+    .card {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      transform-style: preserve-3d;
+      transition: transform 0.8s;
+    }
+    .flipped {
+      transform: rotateY(180deg);
+    }
+    .side {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      backface-visibility: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .front {
+      background: #3490dc;
+      color: white;
+    }
+    .back {
+      background: #38c172;
+      color: white;
+      transform: rotateY(180deg);
+    }
+    .split-screen {
+      display: flex;
+      height: 100vh;
+    }
+    .left {
+      width: 50%;
+      background-color: #1a202c;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .right {
+      width: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f3f4f6;
+    }
+  </style>
+</head>
+<body>
+  <div class="split-screen">
+ 
+    <div class="left">
+      <h1 class="text-4xl mb-4">Quiz Competition 2024</h1>
+      <p class="text-lg mb-4">Registration Deadline: <span class="text-red-500">October 4th</span></p>
+      <p class="text-lg mb-4">Late registrants will incur a fine of <span class="text-red-500">5000 Naira</span>.</p>
+      <h2 class="text-2xl mb-4">Quiz Details</h2>
+      <p class="text-lg mb-4">The competition will test your knowledge on various topics. You will have 2 minutes to answer 10 questions. </p>
+      <p class="text-lg">Hosted by: <span class="font-semibold">Lumen et Veritas International Academy</span></p>
+    </div>
+
+
+    <div class="right">
+      <div class="container">
+        <div class="card" id="card">
+          
+          <div class="side front p-6">
+            <div>
+              <h2 class="text-2xl mb-4">Sign Up</h2>
+              <form id="signUpForm" onsubmit="handleSignUp(event)">
+                <input type="text" placeholder="Full Name" id="studentNameSignUp" class="block w-full p-2 mb-4 border border-gray-300 rounded" required>
+                <input type="text" placeholder="School Name" id="schoolNameSignUp" class="block w-full p-2 mb-4 border border-gray-300 rounded" required>
+                <input type="text" placeholder="Student ID" id="studentIdSignUp" class="block w-full p-2 mb-4 border border-gray-300 rounded" required>
+                <button type="submit" class="block w-full bg-blue-500 text-white p-2 rounded">Sign Up</button>
+                <button type="button" class="text-blue-700 mt-4" onclick="flipToLogin()">Already have an account? Log In</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="side back p-6">
+            <div>
+              <h2 class="text-2xl mb-4">Log In</h2>
+              <div id="loginForm">
+                <label for="schoolSelectLogin" class="block mb-2">Select School</label>
+                <select id="schoolSelectLogin" class="block w-full p-2 mb-4 border border-gray-300 rounded" required onchange="populateStudents()">
+                  <option value="" disabled selected>Select School</option>
+                </select>
+
+                <label for="studentSelectLogin" class="block mb-2">Select Student</label>
+                <select id="studentSelectLogin" class="block w-full p-2 mb-4 border border-gray-300 rounded" required>
+                  <option value="" disabled selected>Select Student</option>
+                </select>
+
+                <input type="text" placeholder="Student ID" id="studentIdLogin" class="block w-full p-2 mb-4 border border-gray-300 rounded" required>
+                <button class="block w-full bg-green-500 text-white p-2 rounded"id="logedin">Log In</button>
+                <button type="button" class="text-green-700 mt-4" onclick="flipToSignUp()" >Don't have an account? Sign Up</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="main.js"></script>
+</body>
+</html>

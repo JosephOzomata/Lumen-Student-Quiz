@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Page</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to right, #1e3a8a, #3b82f6);
+    }
+    .card {
+      background-color: white;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 15px;
+    }
+    .timer {
+      font-size: 2rem;
+      color: #ef4444;
+      font-weight: bold;
+    }
+    .submit-btn {
+      background-color: #10b981;
+      transition: background-color 0.3s ease;
+    }
+    .submit-btn:hover {
+      background-color: #059669;
+    }
+    .return-btn {
+      background-color: #2563eb;
+      transition: background-color 0.3s ease;
+    }
+    .return-btn:hover {
+      background-color: #1d4ed8;
+    }
+    .nav-btn {
+      background-color: #3b82f6;
+      transition: background-color 0.3s ease;
+      padding: 10px 20px;
+      color: white;
+      border-radius: 5px;
+      margin: 5px;
+    }
+    .nav-btn:hover {
+      background-color: #2563eb;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center h-screen">
+  <div class="w-full max-w-2xl p-6 card">
+    <h1 class="text-3xl font-bold mb-6 text-center text-gray-700">Quiz Time!</h1>
+    <p class="timer text-center mb-6">Time left: <span id="timer">02:00</span></p>
+
+    
+    <div class="mb-6 text-center">
+      <h2 class="text-xl text-gray-600 font-semibold">School: <span id="schoolName"><p id="schoolNameDisplay"></p></span></h2>
+      <h2 class="text-xl text-gray-600 font-semibold">Student: <span id="studentName"><p id="studentNameDisplay"></p></span></h2>
+    </div>
+
+    <div id="quizContainer" class="space-y-6 mb-6">
+
+    </div>
+
+    <div class="flex justify-between mb-6">
+      <button id="prevQuestion" class="nav-btn hidden" onclick="prevQuestion()">Previous</button>
+      <button id="nextQuestion" class="nav-btn" onclick="nextQuestion()">Next</button>
+    </div>
+
+    <button id="submitQuiz" class="w-full py-3 text-white font-semibold rounded-lg submit-btn hidden" onclick="submitQuiz()">Submit Quiz</button>
+
+    <div id="resultContainer" class="hidden">
+      <p id="score" class="text-2xl mb-6 text-center text-gray-700"></p>
+      <h3 class="text-lg mb-4 text-gray-600 font-semibold">Your Previous Scores:</h3>
+      <ul id="previousScores" class="list-disc pl-5 mb-6 text-gray-600"></ul>
+      <button class="w-full py-3 text-white font-semibold rounded-lg return-btn" onclick="window.location.href='index.html'">Return to Home</button>
+    </div>
+  </div>
+
+
+  <script>
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const school = localStorage.getItem('loggedInSchool');
+    const student = localStorage.getItem('loggedInStudent');
+
+    if (school && student) {
+      document.getElementById('schoolNameDisplay').textContent = `School: ${school}`;
+      document.getElementById('studentNameDisplay').textContent = `Student: ${student}`;
+    } else {
+      document.getElementById('schoolNameDisplay').textContent = 'No school data available';
+      document.getElementById('studentNameDisplay').textContent = 'No student data available';
+    }
+  });
+    const questions = [
+  { question: 'What is (5 * 2) - 6?', answers: ['2', '3', '4', '5'], correct: 2 },
+  { question: 'What is the capital of France?', answers: ['London', 'Paris', 'Rome', 'Berlin'], correct: 1 },
+  { question: 'Who wrote "The BFG"?', answers: ['Roald Dahl', 'Grace Smith', 'Rihannah', 'Sam'], correct: 0 },
+  { question: 'What is the boiling point of water?', answers: ['100°C', '100f', '50°C', '50f'], correct: 0 },
+  { question: 'Which planet is known as the Red Planet?', answers: ['Earth', 'Mars', 'Jupiter', 'Venus'], correct: 1 },
+  { question: 'Who discovered gravity?', answers: ['Newton', 'Einstein', 'Galileo', 'Darwin'], correct: 0 },
+  { question: 'What is the largest ocean?', answers: ['Atlantic', 'Indian', 'Pacific', 'Arctic'], correct: 2 },
+  { question: 'What is the smallest prime number?', answers: ['1', '2', '3', '5'], correct: 1 },
+  { question: 'What year did World War I begin?', answers: ['1914', '1918', '1939', '1945'], correct: 0 },
+  { question: 'Who painted the Mona Lisa?', answers: ['Van Gogh', 'Da Vinci', 'Michelangelo', 'Picasso'], correct: 1 }
+];
+
+let currentQuestionIndex = 0;
+let answers = [];
+let timeLeft = 120; 
+let timerInterval;
+
+function startTimer() {
+  const timerDisplay = document.getElementById('timer');
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      submitQuiz();
+    }
+  }, 1000);
+}
+
+function renderQuestion() {
+  const quizContainer = document.getElementById('quizContainer');
+  const questionObj = questions[currentQuestionIndex];
+
+  quizContainer.innerHTML = `
+    <h3 class="mb-2 text-gray-700 font-medium">${currentQuestionIndex + 1}. ${questionObj.question}</h3>
+    ${questionObj.answers.map((answer, i) => `
+      <label class="block">
+        <input type="radio" name="question${currentQuestionIndex}" value="${i}" ${answers[currentQuestionIndex] === i ? 'checked' : ''}> ${answer}
+      </label>
+    `).join('')}
+  `;
+
+  document.getElementById('prevQuestion').classList.toggle('hidden', currentQuestionIndex === 0);
+  document.getElementById('nextQuestion').classList.toggle('hidden', currentQuestionIndex === questions.length - 1);
+  document.getElementById('submitQuiz').classList.toggle('hidden', currentQuestionIndex !== questions.length - 1);
+}
+
+function nextQuestion() {
+  const selected = document.querySelector(`input[name="question${currentQuestionIndex}"]:checked`);
+  if (selected) {
+    answers[currentQuestionIndex] = parseInt(selected.value);
+    currentQuestionIndex++;
+    renderQuestion();
+  } else {
+    alert('Please select an answer before proceeding.');
+  }
+}
+
+function prevQuestion() {
+  currentQuestionIndex--;
+  renderQuestion();
+}
+
+function submitQuiz() {
+  clearInterval(timerInterval);
+
+  const score = calculateScore();
+  displayResults(score);
+  saveScoreToLocalStorage(score);
+}
+
+function calculateScore() {
+  let correctAnswers = 0;
+  answers.forEach((answer, index) => {
+    if (answer === questions[index].correct) {
+      correctAnswers++;
+    }
+  });
+  return (correctAnswers / questions.length) * 100;
+}
+
+function displayResults(score) {
+  document.getElementById('quizContainer').classList.add('hidden');
+  document.getElementById('prevQuestion').classList.add('hidden');
+  document.getElementById('nextQuestion').classList.add('hidden');
+  document.getElementById('submitQuiz').classList.add('hidden');
+  document.getElementById('resultContainer').classList.remove('hidden');
+
+  document.getElementById('score').textContent = `Your Score: ${score}%`;
+
+  const previousScores = getPreviousScoresForStudent();
+  document.getElementById('previousScores').innerHTML = previousScores.map(score => `<li>${score}%</li>`).join('');
+}
+
+function saveScoreToLocalStorage(score) {
+  const studentName = localStorage.getItem('loggedStudent');
+  const schoolName = localStorage.getItem('loggedSchool');
+  const studentScores = JSON.parse(localStorage.getItem('quizScores')) || {};
+  
+  if (!studentScores[schoolName]) {
+    studentScores[schoolName] = {};
+  }
+  if (!studentScores[schoolName][studentName]) {
+    studentScores[schoolName][studentName] = [];
+  }
+  studentScores[schoolName][studentName].push(score);
+
+  localStorage.setItem('quizScores', JSON.stringify(studentScores));
+}
+
+function getPreviousScoresForStudent() {
+  const studentName = localStorage.getItem('loggedStudent');
+  const schoolName = localStorage.getItem('loggedSchool');
+  const studentScores = JSON.parse(localStorage.getItem('quizScores')) || {};
+
+  if (studentScores[schoolName] && studentScores[schoolName][studentName]) {
+    return studentScores[schoolName][studentName];
+  }
+  return [];
+}
+
+window.onload = function () {
+  document.getElementById('studentName').textContent = localStorage.getItem('loggedInStudent');
+  document.getElementById('schoolName').textContent = localStorage.getItem('loggedInSchool');
+  renderQuestion();
+  startTimer();
+}
+  </script>
+</body>
+</html>
